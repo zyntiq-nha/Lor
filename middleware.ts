@@ -32,34 +32,22 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  // Refresh session if it exists
   const {
     data: { user }
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-  const isAdminRoute = pathname.startsWith("/admin");
-  const isApiRoute = pathname.startsWith("/api/admin");
+  const isProtectedPath = pathname.startsWith("/admin") || pathname.startsWith("/api/admin");
 
-  // API routes are handled by requireAdmin in their own handlers
-  // This avoids double DB checks and potential Edge sync issues
-  if (isApiRoute) {
-    return response;
-  }
-
-  if (isAdminRoute) {
-    let isAdmin = false;
-    if (user) {
-      const { data: adminRecord } = await supabase
-        .from("admins")
-        .select("id")
-        .eq("id", user.id)
-        .maybeSingle();
-      isAdmin = !!adminRecord;
+  // Basic check: If trying to access admin area and not even logged in, redirect.
+  // We leave the "is this user an admin" check to the Server Components (Layout/API)
+  // for better stability and to avoid excessive DB calls in the Edge middleware.
+  if (isProtectedPath && !user) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    if (!isAdmin) {
-      return NextResponse.redirect(new URL(LOGIN_PATH, request.url));
-    }
+    return NextResponse.redirect(new URL(LOGIN_PATH, request.url));
   }
 
   return response;
