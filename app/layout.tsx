@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 export const metadata = {
-  title: "LOR Generator",
+  title: "Zyntiq LOR",
   description: "Self-service letter of recommendation generator"
 };
 

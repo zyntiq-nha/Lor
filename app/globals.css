@@ -147,10 +147,12 @@ body {
 
 .grid.two {
   grid-template-columns: 1fr;
+  align-items: start;
 }
 
 .grid.three {
   grid-template-columns: 1fr;
+  align-items: start;
 }
 
 @media (min-width: 900px) {
@@ -162,6 +164,7 @@ body {
     grid-template-columns: 1fr 1fr 1fr;
   }
 }
+
 
 .card {
   background: var(--surface);
@@ -458,6 +461,32 @@ pre.preview {
   text-align: right;
   font-size: 0.78rem;
 }
+
+.lor-reference {
+  margin-top: 2.2rem;
+  font-size: 0.72rem;
+  color: #4b5563;
+}
+
+.lor-qr {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  left: 0;
+  bottom: -10px;
+  object-fit: contain;
+}
+
+.lor-footer-wrap {
+  margin-top: 2rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #d1d5db;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #374151;
+}
+
 
 @media (max-width: 560px) {
   .container {
