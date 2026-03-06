@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { Document, Image, Page, StyleSheet, Text, View, pdf } from "@react-pdf/renderer";
 import { createServiceRoleClient } from "@/lib/supabaseAdmin";
 import { renderTemplate } from "@/lib/renderTemplate";
+import QRCode from "qrcode";
 
 export const runtime = "nodejs";
 
@@ -77,6 +78,14 @@ const styles = StyleSheet.create({
     top: -15,
     objectFit: "contain"
   },
+  qrCodeImage: {
+    position: "absolute",
+    width: 64,
+    height: 64,
+    left: 0,
+    bottom: -10,
+    objectFit: "contain"
+  },
   footerWrap: {
     position: "absolute",
     left: 46,
@@ -138,7 +147,7 @@ function buildReferenceId(content: string): string {
   return `ZYNTIQ-LOR-${dateTag}-${hash.toString(16).slice(0, 6).toUpperCase()}`;
 }
 
-function createLORDocument(content: string, logoSrc: string | null, signSealSrc: string | null) {
+function createLORDocument(content: string, logoSrc: string | null, signSealSrc: string | null, qrCodeSrc: string | null) {
   const { body, closing } = splitBodyAndClosing(content);
   const paragraphs = body
     .split(/\n\s*\n/)
@@ -180,14 +189,15 @@ function createLORDocument(content: string, logoSrc: string | null, signSealSrc:
       ),
       closing.length > 0
         ? React.createElement(
-            View,
-            { style: styles.closingSection },
-            ...closing.map((line, index) =>
-              React.createElement(Text, { key: `c-${index}`, style: styles.closingLine }, line)
-            ),
-            React.createElement(Text, { style: styles.referenceId }, `Reference ID: ${referenceId}`),
-            signSealSrc ? React.createElement(Image, { src: signSealSrc, style: styles.stampOverlay }) : null
-          )
+          View,
+          { style: styles.closingSection },
+          ...closing.map((line, index) =>
+            React.createElement(Text, { key: `c-${index}`, style: styles.closingLine }, line)
+          ),
+          React.createElement(Text, { style: styles.referenceId }, `Reference ID: ${referenceId}`),
+          signSealSrc ? React.createElement(Image, { src: signSealSrc, style: styles.stampOverlay }) : null,
+          qrCodeSrc ? React.createElement(Image, { src: qrCodeSrc, style: styles.qrCodeImage }) : null
+        )
         : null,
       React.createElement(
         View,
@@ -215,13 +225,25 @@ export async function POST(request: Request) {
 
   const { data: user, error: userErr } = await supabase
     .from("lor_users")
-    .select("name,role,tenure,template_id")
+    .select("name,role,tenure,template_id,last_downloaded_at")
     .eq("token", cleanToken)
     .maybeSingle();
 
   if (userErr || !user) {
     return NextResponse.json({ error: "Record not found" }, { status: 404 });
   }
+
+  if (user.last_downloaded_at) {
+    const timeDiff = Date.now() - new Date(user.last_downloaded_at).getTime();
+    if (timeDiff < 60000) {
+      return NextResponse.json({ error: "Please wait 1 minute before generating another copy." }, { status: 429 });
+    }
+  }
+
+  await supabase
+    .from("lor_users")
+    .update({ last_downloaded_at: new Date().toISOString() })
+    .eq("token", cleanToken);
 
   const { data: template, error: templateErr } = await supabase
     .from("templates")
@@ -246,11 +268,15 @@ export async function POST(request: Request) {
     Date: today
   });
 
-  const assetsDir = path.join(process.cwd(), "public", "stamp & signature");
+  const assetsDir = path.join(process.cwd(), "public", "assets");
   const logoSrc = toDataUri(path.join(assetsDir, "logo.png"));
   const signSealSrc = toDataUri(path.join(assetsDir, "seal&sign.png"));
 
-  const blob = await pdf(createLORDocument(safeContent, logoSrc, signSealSrc)).toBlob();
+  const { origin } = new URL(request.url);
+  const verificationUrl = `${origin}/verify?token=${cleanToken}`;
+  const qrCodeSrc = await QRCode.toDataURL(verificationUrl, { margin: 1, width: 128 });
+
+  const blob = await pdf(createLORDocument(safeContent, logoSrc, signSealSrc, qrCodeSrc)).toBlob();
   const buffer = Buffer.from(await blob.arrayBuffer());
 
   return new NextResponse(buffer, {

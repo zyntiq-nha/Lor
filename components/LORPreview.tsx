@@ -87,7 +87,7 @@ export default function LORPreview({ initialContent, verifyToken }: Props) {
         <div className="lor-header">
           <Image
             className="lor-logo"
-            src="/stamp%20%26%20signature/logo.png"
+            src="/assets/logo.png"
             alt="Company logo"
             width={128}
             height={36}
@@ -114,7 +114,7 @@ export default function LORPreview({ initialContent, verifyToken }: Props) {
             ))}
             <Image
               className="lor-stamp"
-              src="/stamp%20%26%20signature/seal%26sign.png"
+              src="/assets/seal&sign.png"
               alt="Seal and signature"
               width={98}
               height={98}

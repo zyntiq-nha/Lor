@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <header className="topnav">
             <Link href="/" className="brand-logo-link" aria-label="Go to home">
               <Image
-                src="/stamp%20%26%20signature/logo.png"
+                src="/assets/logo.png"
                 alt="Zyntiq"
                 className="brand-logo"
                 width={130}
