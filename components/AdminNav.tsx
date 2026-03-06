@@ -1,6 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function AdminNav() {
+  const router = useRouter();
+
+  async function handleSignOut() {
+    await fetch("/api/auth/signout", { method: "POST" });
+    router.push("/login");
+  }
+
   return (
     <div className="admin-nav">
       <div className="admin-links">
@@ -14,9 +24,9 @@ export default function AdminNav() {
           Users
         </Link>
       </div>
-      <Link className="btn" href="/api/auth/signout">
+      <button className="btn" onClick={handleSignOut}>
         Sign out
-      </Link>
+      </button>
     </div>
   );
 }
