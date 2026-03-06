@@ -50,6 +50,9 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isAdminRoute && !isAdmin) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.redirect(new URL(LOGIN_PATH, request.url));
   }
 
@@ -57,5 +60,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"]
+  matcher: ["/admin/:path*", "/api/admin/:path*"]
 };
