@@ -107,3 +107,49 @@ drop trigger if exists trg_lor_users_updated_at on public.lor_users;
 create trigger trg_lor_users_updated_at
 before update on public.lor_users
 for each row execute function public.touch_updated_at();
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- Seed: LOR Templates for new roles (Marketing & Business Development)
+-- Run once after initial schema setup. Uses ON CONFLICT DO NOTHING so it is
+-- safe to re-run the full script without creating duplicates.
+-- ────────────────────────────────────────────────────────────────────────────
+
+insert into public.templates (name, department, tenure, template_content, is_active)
+values (
+  'Zyntiq Marketing LOR',
+  'Marketing',
+  '1-2 Months',
+  'It is a pleasure to write this letter of recommendation for {{Name}}. During the {{Tenure}} {{Role}} internship with us, {{Name}} demonstrated a strong grasp of digital marketing principles, brand communication, and audience engagement strategies. They approached every task with creativity and a results-driven mindset.
+
+Throughout the internship, {{Name}} contributed meaningfully to our marketing initiatives — from content creation and social media management to campaign planning and analytics review. Their ability to translate ideas into compelling narratives was evident in the quality of work they delivered consistently and on time.
+
+We found {{Name}} to be a motivated, proactive, and collaborative team member who brought genuine enthusiasm to every project. Their professionalism and eagerness to learn made them a valued addition to our Marketing team at Zyntiq.
+
+I wholeheartedly recommend {{Name}} for any future academic or professional opportunities in the field of Marketing. We are confident they will continue to excel and make a meaningful impact wherever they go.
+
+Sincerely,
+Atul Kumar
+Founder Zyntiq.',
+  true
+)
+on conflict do nothing;
+
+insert into public.templates (name, department, tenure, template_content, is_active)
+values (
+  'Zyntiq Business Development LOR',
+  'Business Development',
+  '1-2 Months',
+  'It is a pleasure to write this letter of recommendation for {{Name}}. During the {{Tenure}} {{Role}} internship with us, {{Name}} displayed exceptional aptitude for identifying business opportunities, building professional relationships, and contributing to our growth strategy with maturity beyond their experience level.
+
+{{Name}} actively participated in market research, lead generation activities, and client outreach efforts, demonstrating a clear understanding of business dynamics and sales fundamentals. Their analytical thinking and communication skills were consistently impressive, and they delivered every assignment with diligence and precision.
+
+We at Zyntiq found {{Name}} to be a driven, goal-oriented, and reliable individual who adapted quickly to real-world business challenges. They were a true asset to our Business Development team and left a positive impression on everyone they worked with.
+
+I wholeheartedly recommend {{Name}} for any future academic or professional pursuits in Business Development or related fields. We are certain they have a bright and successful career ahead.
+
+Sincerely,
+Atul Kumar
+Founder Zyntiq.',
+  true
+)
+on conflict do nothing;

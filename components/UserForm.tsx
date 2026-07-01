@@ -24,7 +24,12 @@ type Props = {
   onCancel?: () => void;
 };
 
-const ROLE_OPTIONS = ["Talent Acquisition", "Talent Acquisition & Marketing"];
+const ROLE_OPTIONS = [
+  "Talent Acquisition",
+  "Talent Acquisition & Marketing",
+  "Marketing",
+  "Business Development Associate",
+];
 const TENURE_OPTIONS = ["1 Month", "2 Months"];
 
 export default function UserForm({ templates, onSubmit, initialData, onCancel }: Props) {
